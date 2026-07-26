@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # ============================================================
-# FIREBASE SERVICE ACCOUNT (FROM YOUR JSON)
+# FIREBASE SERVICE ACCOUNT (HARDCODED)
 # ============================================================
 FIREBASE_CREDENTIALS = {
     "type": "service_account",
@@ -36,10 +36,10 @@ firebase_admin.initialize_app(cred_obj, {
 ref = db.reference('/')
 
 # ============================================================
-# BOT TOKENS
+# BOT TOKENS (YOUR CORRECT ONES)
 # ============================================================
 ENTRY_BOT_TOKEN = "8501142592:AAFep9TneyIhAPRh4LNsLI_-gR8kBqU0xqA"
-MAIN_BOT_TOKEN = "8718104402:AAFiR3525kfUljhfhw6G6zra-7eQ6kTeOg"
+MAIN_BOT_TOKEN = "8718104402:AAFiYR3525kfUljhfhw6G6zra-7eQ6kTeOg"
 ADVERTISER_BOT_TOKEN = "8320654823:AAETjVGr-pTexuxAeInT2TdSHFnUVYlH9aI"
 ADMIN_BOT_TOKEN = "8335073103:AAGR4GUgYl_yh9l3AymEwx0sPwuJV7xW6MM"
 
@@ -49,11 +49,9 @@ ADMIN_IDS = ['8966823502', '6894471315']
 # RATES & CONFIG
 # ============================================================
 TMC_TO_NAIRA = 100
-WITHDRAWAL_FEE = 0.10  # 10%
-MIN_WITHDRAW_RECEIVE = 100  # ₦100
-VERIFIED_BONUS = 0.20  # +20%
-
-# Palmpay Details
+WITHDRAWAL_FEE = 0.10
+MIN_WITHDRAW_RECEIVE = 100
+VERIFIED_BONUS = 0.20
 PALMPAY_ACCOUNT = "896-2925-124"
 PALMPAY_NAME = "NEXUS EARN LIMITED (TAIWO)"
 
@@ -442,13 +440,11 @@ def main_confirm_command(update, context):
         return
 
     narration = args[0]
-    # Check if deposit exists
     deposits = ref.child('deposits').order_by_child('narration').equal_to(narration).get()
     if not deposits:
         update.message.reply_text("❌ Deposit not found. Please check your narration code and try again.")
         return
 
-    # Find the deposit
     deposit_id = None
     deposit_data = None
     for key, val in deposits.items():
@@ -464,18 +460,15 @@ def main_confirm_command(update, context):
     amount = deposit_data.get('amount', 0)
     tmc_amount = amount // TMC_TO_NAIRA
 
-    # Update balance
     current_balance = get_user_balance(uid)
     new_balance = current_balance + tmc_amount
     ref.child(f'users/{uid}/balance').set(new_balance)
 
-    # Mark deposit as approved
     ref.child(f'deposits/{deposit_id}').update({
         'status': 'approved',
         'approved_at': datetime.now().isoformat()
     })
 
-    # Add to ledger
     ref.child('ledger').push({
         'uid': uid,
         'title': f'💰 Deposit - {narration}',
@@ -550,7 +543,6 @@ def main_withdraw_command(update, context):
     )
     update.message.reply_text(msg, parse_mode='Markdown')
 
-    # Save as pending withdrawal
     ref.child('withdrawals').push({
         'uid': uid,
         'username': user_data.get('username'),
@@ -590,11 +582,9 @@ def main_link_command(update, context):
         )
         return
 
-    # Deduct 5 TMC
     new_balance = balance - 5
     ref.child(f'users/{uid}/balance').set(new_balance)
 
-    # Add to channels
     channels = user_data.get('channels', {})
     channels[asset] = {
         'linked_at': datetime.now().isoformat(),
@@ -603,7 +593,6 @@ def main_link_command(update, context):
     }
     ref.child(f'users/{uid}/channels').set(channels)
 
-    # Add to ledger
     ref.child('ledger').push({
         'uid': uid,
         'title': f'📢 Linked Channel - {asset}',
@@ -870,18 +859,15 @@ def admin_approve(update, context):
     uid_user = deposit.get('uid')
     tmc_amount = amount // TMC_TO_NAIRA
 
-    # Update balance
     current_balance = get_user_balance(uid_user)
     new_balance = current_balance + tmc_amount
     ref.child(f'users/{uid_user}/balance').set(new_balance)
 
-    # Mark deposit as approved
     ref.child(f'deposits/{deposit_id}').update({
         'status': 'approved',
         'approved_at': datetime.now().isoformat()
     })
 
-    # Add to ledger
     ref.child('ledger').push({
         'uid': uid_user,
         'title': f'💰 Deposit Approved',
@@ -995,7 +981,6 @@ def admin_declinew(update, context):
         update.message.reply_text(f"❌ Withdrawal is already {withdrawal.get('status')}.")
         return
 
-    # Refund balance
     uid_user = withdrawal.get('uid')
     tmc_amount = withdrawal.get('tmc_amount', 0)
     current_balance = get_user_balance(uid_user)
@@ -1038,7 +1023,7 @@ def admin_broadcast_command(update, context):
     count = 0
     for key, val in users.items():
         try:
-            update.context.bot.send_message(chat_id=key, text=f"📢 *TMC Broadcast:*\n\n{message}", parse_mode='Markdown')
+            context.bot.send_message(chat_id=key, text=f"📢 *TMC Broadcast:*\n\n{message}", parse_mode='Markdown')
             count += 1
         except:
             pass
@@ -1046,7 +1031,7 @@ def admin_broadcast_command(update, context):
     update.message.reply_text(f"✅ *Broadcast sent to {count} users!*", parse_mode='Markdown')
 
 # ============================================================
-# RUN ALL BOTS
+# RUN ALL BOTS (SIMPLE WAY - ONE BOT AT A TIME)
 # ============================================================
 def run_bot(token, handlers):
     updater = Updater(token)
@@ -1060,13 +1045,13 @@ def run_bot(token, handlers):
 def main():
     logger.info("🚀 Starting ALL 4 TMC Bots...")
 
-    # Entry Bot (@TMCStartBot)
+    # ENTRY BOT
     entry_updater = run_bot(ENTRY_BOT_TOKEN, [
         CommandHandler("start", entry_start),
         CallbackQueryHandler(entry_callback)
     ])
 
-    # Main Bot (@TMCTelegraMonetizationBot)
+    # MAIN BOT
     main_updater = run_bot(MAIN_BOT_TOKEN, [
         CommandHandler("start", main_start),
         CallbackQueryHandler(main_callback),
@@ -1077,13 +1062,13 @@ def main():
         CommandHandler("link", main_link_command)
     ])
 
-    # Advertiser Bot (@tmcadvertiserbot)
+    # ADVERTISER BOT
     advert_updater = run_bot(ADVERTISER_BOT_TOKEN, [
         CommandHandler("start", advert_start),
         CallbackQueryHandler(advert_callback)
     ])
 
-    # Admin Bot (@Dytr44fgh5dxyy5rgbot)
+    # ADMIN BOT
     admin_updater = run_bot(ADMIN_BOT_TOKEN, [
         CommandHandler("start", admin_start),
         CallbackQueryHandler(admin_callback),
