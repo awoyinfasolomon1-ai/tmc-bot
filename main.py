@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 BOT_TOKEN = "8501142592:AAFep9TneyIhAPRh4LNsLI_-gR8kBqU0xqA"
 
 # ============================================================
-# ENTRY BOT (@TMCStartBot)
+# COMMANDS
 # ============================================================
 def start(update, context):
     keyboard = [
@@ -37,7 +37,7 @@ def callback(update, context):
 def main():
     logger.info("🚀 Starting TMC Bot...")
     
-    updater = Updater(BOT_TOKEN, use_context=True)
+    updater = Updater(BOT_TOKEN)
     dp = updater.dispatcher
     
     dp.add_handler(CommandHandler("start", start))
