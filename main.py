@@ -1,5 +1,6 @@
 import os
 import logging
+import asyncio
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 
@@ -13,6 +14,10 @@ MAIN_BOT_TOKEN = os.environ.get("MAIN_BOT_TOKEN")
 ADVERTISER_BOT_TOKEN = os.environ.get("ADVERTISER_BOT_TOKEN")
 ADMIN_BOT_TOKEN = os.environ.get("ADMIN_BOT_TOKEN")
 ENTRY_BOT_TOKEN = os.environ.get("ENTRY_BOT_TOKEN")
+
+if not all([MAIN_BOT_TOKEN, ADVERTISER_BOT_TOKEN, ADMIN_BOT_TOKEN, ENTRY_BOT_TOKEN]):
+    logger.error("❌ Missing bot tokens! Please set all 4 environment variables.")
+    exit(1)
 
 # ============================================================
 # ENTRY BOT (@TMCStartBot)
@@ -166,51 +171,42 @@ async def admin_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text("📊 TMC Stats\n\nTotal Revenue: ₦0\nActive Channels: 0\nActive Campaigns: 0")
 
 # ============================================================
-# RUN ALL BOTS
+# RUN ALL BOTS (FIXED)
 # ============================================================
 async def run_bot(token, handlers):
+    """Run a single bot using Application.run_polling()"""
     app = Application.builder().token(token).build()
     for handler in handlers:
         app.add_handler(handler)
-    await app.initialize()
-    await app.start()
-    await app.updater.start_polling()
-    return app
+    logger.info(f"✅ Starting bot with token: {token[:10]}...")
+    # run_polling is async and blocks until stopped
+    await app.run_polling()
 
 async def main():
     logger.info("🚀 Starting all 4 TMC bots...")
 
-    # Entry Bot
-    await run_bot(ENTRY_BOT_TOKEN, [
-        CommandHandler("start", entry_start),
-        CallbackQueryHandler(entry_callback, pattern="^entry_")
-    ])
+    # Create tasks for each bot
+    tasks = [
+        run_bot(ENTRY_BOT_TOKEN, [
+            CommandHandler("start", entry_start),
+            CallbackQueryHandler(entry_callback, pattern="^entry_")
+        ]),
+        run_bot(MAIN_BOT_TOKEN, [
+            CommandHandler("start", main_start),
+            CallbackQueryHandler(main_callback, pattern="^main_")
+        ]),
+        run_bot(ADVERTISER_BOT_TOKEN, [
+            CommandHandler("start", advert_start),
+            CallbackQueryHandler(advert_callback, pattern="^advert_")
+        ]),
+        run_bot(ADMIN_BOT_TOKEN, [
+            CommandHandler("start", admin_start),
+            CallbackQueryHandler(admin_callback, pattern="^admin_")
+        ])
+    ]
 
-    # Main Bot
-    await run_bot(MAIN_BOT_TOKEN, [
-        CommandHandler("start", main_start),
-        CallbackQueryHandler(main_callback, pattern="^main_")
-    ])
-
-    # Advertiser Bot
-    await run_bot(ADVERTISER_BOT_TOKEN, [
-        CommandHandler("start", advert_start),
-        CallbackQueryHandler(advert_callback, pattern="^advert_")
-    ])
-
-    # Admin Bot
-    await run_bot(ADMIN_BOT_TOKEN, [
-        CommandHandler("start", admin_start),
-        CallbackQueryHandler(admin_callback, pattern="^admin_")
-    ])
-
-    logger.info("✅ All 4 TMC Bots are running!")
-    logger.info("📱 Test @TMCStartBot with /start")
-
-    import asyncio
-    while True:
-        await asyncio.sleep(3600)
+    # Run all bots concurrently
+    await asyncio.gather(*tasks)
 
 if __name__ == "__main__":
-    import asyncio
     asyncio.run(main())
