@@ -14,42 +14,38 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # ============================================================
-# READ TOKENS FROM ENVIRONMENT VARIABLES
+# BOT TOKENS (From Environment Variables)
 # ============================================================
-ENTRY_BOT_TOKEN = os.environ.get("ENTRY_BOT_TOKEN")
-MAIN_BOT_TOKEN = os.environ.get("MAIN_BOT_TOKEN")
-ADVERTISER_BOT_TOKEN = os.environ.get("ADVERTISER_BOT_TOKEN")
-ADMIN_BOT_TOKEN = os.environ.get("ADMIN_BOT_TOKEN")
+ENTRY_BOT_TOKEN = os.environ.get("ENTRY_BOT_TOKEN", "8501142592:AAFep9TneyIhAPRh4LNsLI_-gR8kBqU0xqA")
+MAIN_BOT_TOKEN = os.environ.get("MAIN_BOT_TOKEN", "8718104402:AAFiYR3525kfUljhfhw6G6zra-7eQ6kTeOg")
+ADVERTISER_BOT_TOKEN = os.environ.get("ADVERTISER_BOT_TOKEN", "8320654823:AAETjVGr-pTexuxAeInT2TdSHFnUVYlH9aI")
+ADMIN_BOT_TOKEN = os.environ.get("ADMIN_BOT_TOKEN", "8335073103:AAGR4GUgYl_yh9l3AymEwx0sPwuJV7xW6MM")
 ADMIN_IDS = ['8966823502', '6894471315']
 
 # ============================================================
-# READ FIREBASE CREDENTIALS FROM ENVIRONMENT VARIABLES
+# FIREBASE CREDENTIALS (HARDCODED - VALID KEY)
 # ============================================================
-FIREBASE_PRIVATE_KEY = os.environ.get("FIREBASE_PRIVATE_KEY", "").replace('\\n', '\n')
-FIREBASE_CLIENT_EMAIL = os.environ.get("FIREBASE_CLIENT_EMAIL", "")
-FIREBASE_DATABASE_URL = os.environ.get("FIREBASE_DATABASE_URL", "")
+FIREBASE_CREDENTIALS = {
+    "type": "service_account",
+    "project_id": "tmc-monetization",
+    "private_key_id": "204096c8719ca80e4a3858a1f7376917bdf9b6ca",
+    "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDGW4C7X92IXmjI\n5t+h1+2mHUKgauAF0Uu/OXTqM+4oSGCd67xrATZJfddWL0+pn0SqL6/Nt99g0mrt\nNiGygvJAWzPMKmF39KinwCv/cT+Q4mkCVaYLhUpvWu8010DAduRz9LX46KBnXM6n\nh+CsJRsIzeg2GvfiquTH3Gh3hm+qUJVp91PdzLoqE2cjw0+WWOzk8iXdJ1ZtqJNm\n8rs/zq0qUXqCZtuNNKE2rMd+ThJ7QIGayRHJFcIA+gZOK3u2GAr7boG4lh0pbJMl\n48hLYwE1dJt6pRSfYtAqCpmgcH8PBvdghpAcDXZGWCH53d4EctM79lrbz+0+GSeC\nO+m8F2KHAgMBAAECggEAASQflAtqHp/QvE4E/ZyAdCbjde9PyKeBAMBR4x/pUJxz\na+uNy+AxcwRsnQJp/MSPnKn8udMkeH6K1cWspjuXN2GadJ7i1b0/emqdLoDMD8I2\n9qLGV4Fik5Pwry/0yHdOT5WpTzcqvd174BAsTvhBW2ERyYlBa8YZoI2YTzePMRgL\n5tVMrmZ4EC5wnsPd+RT9fVtsLbQN0kg0XAxYm5igoVsHrJc51Wo5Xe42y6GnyheF\nGfwUmDitp+ZX6PmULMNXlhmWZqkfvWsAsaACzgAup476U7EcygPus69+ktnGac2Q\n0xbbkFhh7APxemUy1bny5k3zB1dbTNjJePWc07VYnQKBgQD19xbCsJZo+pz2niLT\nZTZtp/P8jGOEBqNSjR9W9YcWmExRMG1iqriDUtRN7pg65npbThZR2ltqk6u2D8Om\nFW5tVuP4qtpP1AKhkmp0VIlTWlJtZwVq/9F7fnttvjrXmCfFNBXD/06sUICtJgZF\nreC2teJOAeSHMO2pBvReaQ64pQKBgQDOczBQTeEO8qKIh0BoGcZSBl1xYanr1z48\nE1j4GGOna9wTITU/ywUSVkILCse2iR2qL+umswVHYGDKFhf2eg5f1oG/kpJQcu90\numsru1nPtfu7FjDVhdGRHe8dsFnQw1Q2Fow/XYS3FdU/SCUlAwzU2iIxGmh/kPXv\nLdr625LauwKBgQDYqy/Gkw38LgAFEyp0c60tjYzVRMoJLFvExYH89U5prgFUZ8eD\n6gWd0WIpwGsjP5I7Sh9JPYPX73uMZnifnjNnZ+psS/0B4y3qLHNQRIOwBFml++F+\n7xkWo0WRV8i30FYAVrBxtj4UdtnTLTLLQK855CEVPH+WQ5ink/PCEuOf7QKBgQCr\nvRr10rNj8efPV2P2tWpLFcxp42qtLDMzWozqZa+QuKMsrrVTShn/9Q2fjeoxKMMq\nrg6Eb+v2QnCB6/snKMYIZ7MroExi7BnSqrk4efPuXF76dS1OkrGQ3KvrsKYmijbl\nf8BPfgZHH7xzlhqAPZdRAdzrqCJB7F8KBsVhZYM2vQKBgQCaVmSJm1SkoCk7JFhP\nEs+LZ+3JrTh/6qbTrRcvPIy38jZoY6jqHKoOrChglJj9Fm+OgwVrakHUbU5sKNx+\nWAHVurODtpYfMSDkXCA3PHY6ZR3R97yHXST9a7UlC8fvcDn19nt2kUbSxtZC4iXD\nc9vjpc56mQ/o3M1LO0jWrXKxgg==\n-----END PRIVATE KEY-----\n",
+    "client_email": "firebase-adminsdk-fbsvc@tmc-monetization.iam.gserviceaccount.com",
+    "client_id": "117730776419641959543",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40tmc-monetization.iam.gserviceaccount.com",
+    "universe_domain": "googleapis.com"
+}
 
-if FIREBASE_PRIVATE_KEY and FIREBASE_CLIENT_EMAIL and FIREBASE_DATABASE_URL:
-    FIREBASE_CREDENTIALS = {
-        "type": "service_account",
-        "project_id": "tmc-monetization",
-        "private_key_id": "204096c8719ca80e4a3858a1f7376917bdf9b6ca",
-        "private_key": FIREBASE_PRIVATE_KEY,
-        "client_email": FIREBASE_CLIENT_EMAIL,
-        "client_id": "117730776419641959543",
-        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-        "token_uri": "https://oauth2.googleapis.com/token",
-        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-        "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40tmc-monetization.iam.gserviceaccount.com",
-        "universe_domain": "googleapis.com"
-    }
-    cred_obj = credentials.Certificate(FIREBASE_CREDENTIALS)
-    firebase_admin.initialize_app(cred_obj, {'databaseURL': FIREBASE_DATABASE_URL})
-    ref = db.reference('/')
-    logger.info("✅ Firebase connected!")
-else:
-    logger.warning("⚠️ Firebase not configured. Running without database.")
-    ref = None
+cred_obj = credentials.Certificate(FIREBASE_CREDENTIALS)
+firebase_admin.initialize_app(cred_obj, {
+    'databaseURL': 'https://tmc-monetization-default-rtdb.europe-west1.firebasedatabase.app'
+})
+ref = db.reference('/')
+
+logger.info("✅ Firebase connected!")
 
 # ============================================================
 # RATES & CONFIG
@@ -61,19 +57,15 @@ PALMPAY_ACCOUNT = "896-2925-124"
 PALMPAY_NAME = "NEXUS EARN LIMITED (TAIWO)"
 
 # ============================================================
-# FIREBASE HELPERS (with safety checks)
+# FIREBASE HELPERS
 # ============================================================
 def get_user(uid):
-    if not ref:
-        return None
     try:
         return ref.child(f'users/{uid}').get()
     except:
         return None
 
 def create_user(uid, username):
-    if not ref:
-        return False
     try:
         user_data = {
             'uid': uid,
@@ -302,19 +294,16 @@ def main_callback(update, context):
         query.edit_message_text(msg, reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif data == "main_history":
-        if not ref:
-            msg = "📊 Firebase not connected."
+        ledger = ref.child('ledger').order_by_child('uid').equal_to(uid).get()
+        if not ledger:
+            msg = "📊 No transaction history."
         else:
-            ledger = ref.child('ledger').order_by_child('uid').equal_to(uid).get()
-            if not ledger:
-                msg = "📊 No transaction history."
-            else:
-                items = list(ledger.values())[-5:][::-1]
-                msg = "📊 Recent Transactions:\n\n"
-                for item in items:
-                    amount = item.get('amount', 0)
-                    type_icon = "➕" if item.get('type') == 'credit' else "➖"
-                    msg += f"{type_icon} {item.get('title', 'Transaction')}: {amount} TMC\n"
+            items = list(ledger.values())[-5:][::-1]
+            msg = "📊 Recent Transactions:\n\n"
+            for item in items:
+                amount = item.get('amount', 0)
+                type_icon = "➕" if item.get('type') == 'credit' else "➖"
+                msg += f"{type_icon} {item.get('title', 'Transaction')}: {amount} TMC\n"
         keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="main_back")]]
         query.edit_message_text(msg, reply_markup=InlineKeyboardMarkup(keyboard))
 
@@ -425,19 +414,16 @@ def advert_callback(update, context):
         query.edit_message_text(msg, reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif data == "advert_campaigns":
-        if not ref:
-            msg = "📊 Firebase not connected."
+        campaigns = ref.child('campaigns').order_by_child('advertiser_id').equal_to(uid).get()
+        if not campaigns:
+            msg = "📊 You have no campaigns."
         else:
-            campaigns = ref.child('campaigns').order_by_child('advertiser_id').equal_to(uid).get()
-            if not campaigns:
-                msg = "📊 You have no campaigns."
-            else:
-                msg = "📊 Your Campaigns:\n\n"
-                for key, val in campaigns.items():
-                    status = val.get('status', 'active')
-                    progress = val.get('progress', 0)
-                    goal = val.get('goal', 0)
-                    msg += f"🔹 {val.get('title', 'Campaign')}: {progress}/{goal} ({status})\n"
+            msg = "📊 Your Campaigns:\n\n"
+            for key, val in campaigns.items():
+                status = val.get('status', 'active')
+                progress = val.get('progress', 0)
+                goal = val.get('goal', 0)
+                msg += f"🔹 {val.get('title', 'Campaign')}: {progress}/{goal} ({status})\n"
         keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="advert_back")]]
         query.edit_message_text(msg, reply_markup=InlineKeyboardMarkup(keyboard))
 
@@ -468,7 +454,7 @@ def advert_callback(update, context):
         query.edit_message_text(msg, reply_markup=InlineKeyboardMarkup(keyboard))
 
 # ============================================================
-# ADMIN BOT (@Dytr44fgh5dxyy5rgbot) - SECRET
+# ADMIN BOT (@Dytr44fgh5dxyy5rgbot)
 # ============================================================
 def admin_start(update, context):
     user = update.effective_user
@@ -502,69 +488,57 @@ def admin_callback(update, context):
         return
 
     if data == "admin_deposits":
-        if not ref:
-            msg = "📋 Firebase not connected."
+        deposits = ref.child('deposits').order_by_child('status').equal_to('pending').get()
+        if not deposits:
+            msg = "📋 No pending deposits."
         else:
-            deposits = ref.child('deposits').order_by_child('status').equal_to('pending').get()
-            if not deposits:
-                msg = "📋 No pending deposits."
-            else:
-                msg = "📋 Pending Deposits:\n\n"
-                for key, val in deposits.items():
-                    msg += f"🔹 {val.get('username')}: ₦{val.get('amount')} - {val.get('narration')}\n"
-                    msg += f"   /approve {key}  |  /decline {key}\n\n"
+            msg = "📋 Pending Deposits:\n\n"
+            for key, val in deposits.items():
+                msg += f"🔹 {val.get('username')}: ₦{val.get('amount')} - {val.get('narration')}\n"
+                msg += f"   /approve {key}  |  /decline {key}\n\n"
         keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="admin_back")]]
         query.edit_message_text(msg, reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif data == "admin_withdrawals":
-        if not ref:
-            msg = "📋 Firebase not connected."
+        withdrawals = ref.child('withdrawals').order_by_child('status').equal_to('pending').get()
+        if not withdrawals:
+            msg = "📋 No pending withdrawals."
         else:
-            withdrawals = ref.child('withdrawals').order_by_child('status').equal_to('pending').get()
-            if not withdrawals:
-                msg = "📋 No pending withdrawals."
-            else:
-                msg = "📋 Pending Withdrawals:\n\n"
-                for key, val in withdrawals.items():
-                    msg += f"🔹 {val.get('username')}: ₦{val.get('net_amount')} ({val.get('tmc_amount')} TMC)\n"
-                    msg += f"   /send {key}  |  /declinew {key}\n\n"
+            msg = "📋 Pending Withdrawals:\n\n"
+            for key, val in withdrawals.items():
+                msg += f"🔹 {val.get('username')}: ₦{val.get('net_amount')} ({val.get('tmc_amount')} TMC)\n"
+                msg += f"   /send {key}  |  /declinew {key}\n\n"
         keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="admin_back")]]
         query.edit_message_text(msg, reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif data == "admin_users":
-        if not ref:
-            msg = "👥 Firebase not connected."
+        users = ref.child('users').get()
+        if not users:
+            msg = "👥 Total users: 0"
         else:
-            users = ref.child('users').get()
-            if not users:
-                msg = "👥 Total users: 0"
-            else:
-                count = len(users)
-                msg = f"👥 Total users: {count}\n\n"
-                for key, val in list(users.items())[:10]:
-                    msg += f"🔹 {val.get('username')}: {val.get('balance')} TMC\n"
+            count = len(users)
+            msg = f"👥 Total users: {count}\n\n"
+            for key, val in list(users.items())[:10]:
+                msg += f"🔹 {val.get('username')}: {val.get('balance')} TMC\n"
         keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="admin_back")]]
         query.edit_message_text(msg, reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif data == "admin_stats":
-        if not ref:
-            msg = "📊 Firebase not connected."
-        else:
-            users = ref.child('users').get()
-            total_users = len(users) if users else 0
-            total_balance = 0
-            if users:
-                for key, val in users.items():
-                    total_balance += val.get('balance', 0)
-            deposits = ref.child('deposits').get()
-            total_deposits = len(deposits) if deposits else 0
-            msg = (
-                f"📊 TMC Stats\n\n"
-                f"👥 Total Users: {total_users}\n"
-                f"💰 Total Balance: {total_balance} TMC (₦{total_balance * TMC_TO_NAIRA})\n"
-                f"💳 Total Deposits: {total_deposits}\n"
-                f"📈 Revenue: Coming soon"
-            )
+        users = ref.child('users').get()
+        total_users = len(users) if users else 0
+        total_balance = 0
+        if users:
+            for key, val in users.items():
+                total_balance += val.get('balance', 0)
+        deposits = ref.child('deposits').get()
+        total_deposits = len(deposits) if deposits else 0
+        msg = (
+            f"📊 TMC Stats\n\n"
+            f"👥 Total Users: {total_users}\n"
+            f"💰 Total Balance: {total_balance} TMC (₦{total_balance * TMC_TO_NAIRA})\n"
+            f"💳 Total Deposits: {total_deposits}\n"
+            f"📈 Revenue: Coming soon"
+        )
         keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="admin_back")]]
         query.edit_message_text(msg, reply_markup=InlineKeyboardMarkup(keyboard))
 
@@ -600,9 +574,6 @@ def admin_approve(update, context):
         update.message.reply_text("❌ Usage: /approve [deposit_id]")
         return
     deposit_id = args[0]
-    if not ref:
-        update.message.reply_text("❌ Firebase not connected.")
-        return
     deposit = ref.child(f'deposits/{deposit_id}').get()
     if not deposit:
         update.message.reply_text("❌ Deposit not found.")
@@ -631,9 +602,6 @@ def admin_decline(update, context):
         update.message.reply_text("❌ Usage: /decline [deposit_id]")
         return
     deposit_id = args[0]
-    if not ref:
-        update.message.reply_text("❌ Firebase not connected.")
-        return
     deposit = ref.child(f'deposits/{deposit_id}').get()
     if not deposit:
         update.message.reply_text("❌ Deposit not found.")
@@ -655,9 +623,6 @@ def admin_send(update, context):
         update.message.reply_text("❌ Usage: /send [withdrawal_id]")
         return
     withdrawal_id = args[0]
-    if not ref:
-        update.message.reply_text("❌ Firebase not connected.")
-        return
     withdrawal = ref.child(f'withdrawals/{withdrawal_id}').get()
     if not withdrawal:
         update.message.reply_text("❌ Withdrawal not found.")
@@ -679,9 +644,6 @@ def admin_declinew(update, context):
         update.message.reply_text("❌ Usage: /declinew [withdrawal_id]")
         return
     withdrawal_id = args[0]
-    if not ref:
-        update.message.reply_text("❌ Firebase not connected.")
-        return
     withdrawal = ref.child(f'withdrawals/{withdrawal_id}').get()
     if not withdrawal:
         update.message.reply_text("❌ Withdrawal not found.")
@@ -708,9 +670,6 @@ def admin_broadcast_command(update, context):
         update.message.reply_text("❌ Usage: /broadcast [message]")
         return
     message = ' '.join(args)
-    if not ref:
-        update.message.reply_text("❌ Firebase not connected.")
-        return
     users = ref.child('users').get()
     if not users:
         update.message.reply_text("❌ No users to broadcast to.")
@@ -744,7 +703,7 @@ def run_bot(token, handlers):
         return None
 
 def main():
-    logger.info("🚀 Starting ALL 4 TMC Bots with ENVIRONMENT VARIABLES...")
+    logger.info("🚀 Starting ALL 4 TMC Bots with HARCODED FIREBASE...")
 
     run_bot(ENTRY_BOT_TOKEN, [
         CommandHandler("start", entry_start),
@@ -771,7 +730,7 @@ def main():
         CommandHandler("broadcast", admin_broadcast_command)
     ])
 
-    logger.info("✅ ALL 4 TMC Bots are running with ENVIRONMENT VARIABLES!")
+    logger.info("✅ ALL 4 TMC Bots are running with HARCODED FIREBASE!")
 
     while True:
         time.sleep(3600)
