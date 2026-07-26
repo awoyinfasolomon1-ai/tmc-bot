@@ -1,14 +1,14 @@
-import os
 import logging
-import asyncio
+import threading
+import time
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
+from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # ============================================================
-# HARDCODED BOT TOKENS (READY TO RUN)
+# HARDCODED BOT TOKENS
 # ============================================================
 MAIN_BOT_TOKEN = "8718104402:AAFiR3525kfUljhfhw6G6zra-7eQ6kTeOg"
 ADVERTISER_BOT_TOKEN = "8320654823:AAETjVGr-pTexuxAeInT2TdSHFnUVYlH9aI"
@@ -18,44 +18,44 @@ ENTRY_BOT_TOKEN = "8501142592:AAFep9TneyIhAPRh4LNsLI_-gR8kBqU0xqA"
 # ============================================================
 # ENTRY BOT (@TMCStartBot)
 # ============================================================
-async def entry_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def entry_start(update, context):
     keyboard = [
         [InlineKeyboardButton("💰 I WANT TO EARN", callback_data="entry_earn")],
         [InlineKeyboardButton("📢 I WANT TO ADVERTISE", callback_data="entry_advertise")],
         [InlineKeyboardButton("📖 LEARN MORE", callback_data="entry_learn")],
         [InlineKeyboardButton("❓ HELP", callback_data="entry_help")]
     ]
-    await update.message.reply_text(
+    update.message.reply_text(
         "🚀 WELCOME TO TMC 🔥\n\nTMC - Telegram Monetization Coin\nPowering Digital Value. Rewarding Connections.\n\n💰 Earn from your Telegram channels, groups, and bots!\n📢 Advertise to thousands of engaged users!\n\nChoose your path:",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
-async def entry_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def entry_callback(update, context):
     query = update.callback_query
-    await query.answer()
+    query.answer()
     data = query.data
 
     if data == "entry_earn":
         keyboard = [[InlineKeyboardButton("🚀 GO TO EARN BOT", url="https://t.me/TMCTelegraMonetizationBot")]]
-        await query.edit_message_text(
+        query.edit_message_text(
             "💰 EARN WITH TMC\n\nTurn your Telegram assets into cash!\n\n✅ Link your channels/groups/bots\n✅ Earn from views, clicks, and joins\n✅ Withdraw anytime\n\nGo to @TMCTelegraMonetizationBot to start earning!",
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
     elif data == "entry_advertise":
         keyboard = [[InlineKeyboardButton("🚀 GO TO ADS BOT", url="https://t.me/tmcadvertiserbot")]]
-        await query.edit_message_text(
+        query.edit_message_text(
             "📢 ADVERTISE WITH TMC\n\nReach thousands of engaged users!\n\n✅ Create view/click/join campaigns\n✅ Reach active channels, groups, and bots\n✅ Track performance\n\nGo to @tmcadvertiserbot to create your campaign!",
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
     elif data == "entry_learn":
         keyboard = [[InlineKeyboardButton("🔙 BACK", callback_data="entry_back")]]
-        await query.edit_message_text(
+        query.edit_message_text(
             "📖 ABOUT TMC\n\nTMC is a Telegram monetization platform that connects:\n→ Channel/Group/Bot owners who want to earn\n→ Advertisers who want to reach audiences\n\n💰 1 TMC = ₦100\n💳 Deposit: ₦500 minimum\n💸 Withdraw: Any amount (10% fee)",
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
     elif data == "entry_help":
         keyboard = [[InlineKeyboardButton("🔙 BACK", callback_data="entry_back")]]
-        await query.edit_message_text(
+        query.edit_message_text(
             "❓ HELP\n\n📌 I want to earn: Go to @TMCTelegraMonetizationBot\n📌 I want to advertise: Go to @tmcadvertiserbot\n📌 I have a referral link: Click it and choose your path\n📌 Contact @TMCAdminBot for support",
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
@@ -66,7 +66,7 @@ async def entry_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("📖 LEARN MORE", callback_data="entry_learn")],
             [InlineKeyboardButton("❓ HELP", callback_data="entry_help")]
         ]
-        await query.edit_message_text(
+        query.edit_message_text(
             "🚀 WELCOME TO TMC 🔥\n\nTMC - Telegram Monetization Coin\n\nChoose your path:",
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
@@ -74,153 +74,146 @@ async def entry_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ============================================================
 # MAIN BOT (@TMCTelegraMonetizationBot)
 # ============================================================
-async def main_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def main_start(update, context):
     keyboard = [
         [InlineKeyboardButton("💰 Balance", callback_data="main_balance")],
-        [InlineKeyboardButton("📢 Link Channel/Group/Bot", callback_data="main_link")],
+        [InlineKeyboardButton("📢 Link", callback_data="main_link")],
         [InlineKeyboardButton("💰 Deposit", callback_data="main_deposit")],
         [InlineKeyboardButton("💸 Withdraw", callback_data="main_withdraw")],
-        [InlineKeyboardButton("👥 Referrals", callback_data="main_referrals")],
-        [InlineKeyboardButton("📊 History", callback_data="main_history")],
-        [InlineKeyboardButton("⚙️ Settings", callback_data="main_settings")]
+        [InlineKeyboardButton("👥 Referrals", callback_data="main_referrals")]
     ]
-    await update.message.reply_text(
+    update.message.reply_text(
         "👋 Welcome to TMC Earnings!\n\n💰 Balance: 0 TMC (₦0)\nStatus: 🔰 Unverified\n\n👇 Tap a button:",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
-async def main_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def main_callback(update, context):
     query = update.callback_query
-    await query.answer()
+    query.answer()
     data = query.data
 
     if data == "main_balance":
-        await query.edit_message_text("💰 Your balance: 0 TMC (₦0)")
+        query.edit_message_text("💰 Your balance: 0 TMC (₦0)")
     elif data == "main_link":
-        await query.edit_message_text(
+        query.edit_message_text(
             "📢 Link Your Asset\n\n/link @channel\n/linkgroup @group\n/linkbot @bot\n\nCost: ₦500 (5 TMC) per asset"
         )
     elif data == "main_deposit":
-        await query.edit_message_text(
+        query.edit_message_text(
             "💰 Deposit TMC Coins\n\n🏦 Bank: PalmPay\n📋 Account: 896-2925-124\n📝 Name: NEXUS EARN LIMITED (TAIWO)\n\n1 TMC = ₦100"
         )
     elif data == "main_withdraw":
-        await query.edit_message_text(
-            "💸 Withdraw TMC Coins\n\n/withdraw [amount]\n\n10% fee on top\n\nMinimum withdrawal: Any amount"
-        )
+        query.edit_message_text("💸 Withdraw TMC Coins\n\n/withdraw [amount]\n\n10% fee on top")
     elif data == "main_referrals":
-        await query.edit_message_text(
+        query.edit_message_text(
             "👥 Referral Program\n\nShare your link and earn ₦50!\n\nhttps://t.me/TMCStartBot?start=ref_YOURID"
-        )
-    elif data == "main_history":
-        await query.edit_message_text("📊 Your earnings history will appear here.")
-    elif data == "main_settings":
-        await query.edit_message_text(
-            "⚙️ Settings\n\nChoose ad categories:\n1️⃣ Crypto\n2️⃣ Gaming\n3️⃣ Business\n4️⃣ News\n5️⃣ Memes\n6️⃣ NSFW\n7️⃣ Tech\n8️⃣ Health\n9️⃣ All"
         )
 
 # ============================================================
 # ADVERTISER BOT (@tmcadvertiserbot)
 # ============================================================
-async def advert_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def advert_start(update, context):
     keyboard = [
         [InlineKeyboardButton("💰 Wallet", callback_data="advert_wallet")],
         [InlineKeyboardButton("📢 Create Campaign", callback_data="advert_create")],
-        [InlineKeyboardButton("📊 My Campaigns", callback_data="advert_campaigns")],
-        [InlineKeyboardButton("💳 Deposit", callback_data="advert_deposit")]
+        [InlineKeyboardButton("📊 My Campaigns", callback_data="advert_campaigns")]
     ]
-    await update.message.reply_text(
+    update.message.reply_text(
         "📢 Welcome to TMC Ads!\n\nReach thousands of engaged users!\n\n👇 Tap a button:",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
-async def advert_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def advert_callback(update, context):
     query = update.callback_query
-    await query.answer()
+    query.answer()
     data = query.data
 
     if data == "advert_wallet":
-        await query.edit_message_text("💰 Your wallet: 0 TMC (₦0)")
+        query.edit_message_text("💰 Your wallet: 0 TMC (₦0)")
     elif data == "advert_create":
-        await query.edit_message_text(
+        query.edit_message_text(
             "📢 Create Campaign\n\nUse /create views\nOr /create clicks\nOr /create joins"
         )
     elif data == "advert_campaigns":
-        await query.edit_message_text("📊 You have no active campaigns.")
-    elif data == "advert_deposit":
-        await query.edit_message_text(
-            "💳 Deposit TMC Coins\n\n🏦 Bank: PalmPay\n📋 Account: 896-2925-124\n📝 Name: NEXUS EARN LIMITED (TAIWO)\n\n1 TMC = ₦100"
-        )
+        query.edit_message_text("📊 You have no active campaigns.")
 
 # ============================================================
 # ADMIN BOT (@Dytr44fgh5dxyy5rgbot)
 # ============================================================
-async def admin_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def admin_start(update, context):
     keyboard = [
         [InlineKeyboardButton("📋 Deposits", callback_data="admin_deposits")],
         [InlineKeyboardButton("📋 Withdrawals", callback_data="admin_withdrawals")],
         [InlineKeyboardButton("👥 Users", callback_data="admin_users")],
-        [InlineKeyboardButton("📊 Stats", callback_data="admin_stats")],
-        [InlineKeyboardButton("📢 Broadcast", callback_data="admin_broadcast")]
+        [InlineKeyboardButton("📊 Stats", callback_data="admin_stats")]
     ]
-    await update.message.reply_text(
+    update.message.reply_text(
         "🔐 TMC Admin Panel\n\nWelcome, Admin!\n\n👇 Tap a button:",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
-async def admin_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def admin_callback(update, context):
     query = update.callback_query
-    await query.answer()
+    query.answer()
     data = query.data
 
     if data == "admin_deposits":
-        await query.edit_message_text("📋 No pending deposits.")
+        query.edit_message_text("📋 No pending deposits.")
     elif data == "admin_withdrawals":
-        await query.edit_message_text("📋 No pending withdrawals.")
+        query.edit_message_text("📋 No pending withdrawals.")
     elif data == "admin_users":
-        await query.edit_message_text("👥 Total users: 0")
+        query.edit_message_text("👥 Total users: 0")
     elif data == "admin_stats":
-        await query.edit_message_text(
-            "📊 TMC Stats\n\nTotal Revenue: ₦0\nActive Channels: 0\nActive Campaigns: 0"
-        )
-    elif data == "admin_broadcast":
-        await query.edit_message_text(
-            "📢 Broadcast Message\n\nUse /broadcast [message]\n\nExample: /broadcast Hello everyone!"
-        )
+        query.edit_message_text("📊 TMC Stats\n\nTotal Revenue: ₦0\nActive Channels: 0\nActive Campaigns: 0")
 
 # ============================================================
-# RUN ALL BOTS
+# RUN A SINGLE BOT (Threaded)
 # ============================================================
-async def run_bot(token, handlers):
-    app = Application.builder().token(token).build()
-    for handler in handlers:
-        app.add_handler(handler)
-    logger.info(f"✅ Starting bot...")
-    await app.run_polling()
+def run_bot(token, handlers):
+    try:
+        updater = Updater(token=token, use_context=True)
+        dp = updater.dispatcher
+        for handler in handlers:
+            dp.add_handler(handler)
+        logger.info(f"✅ Bot started: {token[:10]}...")
+        updater.start_polling()
+        # Keep the thread alive
+        while True:
+            time.sleep(1)
+    except Exception as e:
+        logger.error(f"❌ Bot failed: {e}")
 
-async def main():
+# ============================================================
+# MAIN - START ALL 4 BOTS IN THREADS
+# ============================================================
+def main():
     logger.info("🚀 Starting all 4 TMC bots...")
-    
-    tasks = [
-        run_bot(ENTRY_BOT_TOKEN, [
+
+    threads = [
+        threading.Thread(target=run_bot, args=(ENTRY_BOT_TOKEN, [
             CommandHandler("start", entry_start),
             CallbackQueryHandler(entry_callback, pattern="^entry_")
-        ]),
-        run_bot(MAIN_BOT_TOKEN, [
+        ])),
+        threading.Thread(target=run_bot, args=(MAIN_BOT_TOKEN, [
             CommandHandler("start", main_start),
             CallbackQueryHandler(main_callback, pattern="^main_")
-        ]),
-        run_bot(ADVERTISER_BOT_TOKEN, [
+        ])),
+        threading.Thread(target=run_bot, args=(ADVERTISER_BOT_TOKEN, [
             CommandHandler("start", advert_start),
             CallbackQueryHandler(advert_callback, pattern="^advert_")
-        ]),
-        run_bot(ADMIN_BOT_TOKEN, [
+        ])),
+        threading.Thread(target=run_bot, args=(ADMIN_BOT_TOKEN, [
             CommandHandler("start", admin_start),
             CallbackQueryHandler(admin_callback, pattern="^admin_")
-        ])
+        ]))
     ]
-    
-    await asyncio.gather(*tasks)
+
+    for t in threads:
+        t.start()
+        time.sleep(0.5)  # small delay to avoid startup conflicts
+
+    for t in threads:
+        t.join()  # wait forever
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
